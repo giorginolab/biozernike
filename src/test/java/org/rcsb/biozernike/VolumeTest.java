@@ -13,12 +13,15 @@ import org.biojava.nbio.structure.quaternary.BiologicalAssemblyBuilder;
 import org.biojava.nbio.structure.quaternary.BiologicalAssemblyTransformation;
 import org.junit.Test;
 import org.rcsb.biozernike.volume.Volume;
+import org.rcsb.biozernike.volume.MapFileType;
 import org.rcsb.biozernike.volume.ResidueVolumeCache;
 import org.rcsb.biozernike.volume.VolumeConstants;
 import org.rcsb.biozernike.volume.VolumeIO;
 
 import javax.vecmath.Point3d;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +31,7 @@ import static org.junit.Assert.*;
 public class VolumeTest {
 
 	@Test
-	public void mass(){
+	public void mass() throws IOException{
 		Point3d[] points1 = {new Point3d(0,0,0)};
 		String[] resNames1 = {"ALA"};
 
@@ -47,7 +50,6 @@ public class VolumeTest {
 
 		Volume volumeLarge = new Volume();
 		volumeLarge.create(points2,resNames2);
-
 
 		assertEquals(VolumeConstants.getWeight("ALA")*points2.length,
 				volumeLarge.getResiduesNominalWeight(),0);
@@ -141,4 +143,5 @@ public class VolumeTest {
 		String[] resNames = Arrays.stream(reprAtoms).map(a -> a.getGroup().getPDBName()).toArray(String[]::new);
 		volume.create(reprPoints, resNames);
 	}
+	
 }

@@ -99,6 +99,12 @@ public class Volume {
 		bb = new BoundingBox((Bounds) null);
 	}
 
+	public void resetVoxels(){
+		for(int i = 0; i< voxelArray.length; i++){
+			voxelArray[i] = 0;
+		}
+	}
+
 	public void add(Volume other) {
 		if (this.dimensions[0] != other.dimensions[0] ||
 				this.dimensions[1] != other.dimensions[1] ||
@@ -306,7 +312,6 @@ public class Volume {
 		double[] structureVolume = new double[flatVolumeSize];
 		int nAtoms = reprCoords.length;
 		int dims01 = dimensions[0] * dimensions[1];
-
 		for (int indAtom = 0; indAtom < nAtoms; indAtom++) {
 			Point3d atom = reprCoords[indAtom];
 
@@ -654,6 +659,14 @@ public class Volume {
 
 	public void setAtomDistancePadding(double atomDistancePadding) {
 		this.atomDistancePadding = atomDistancePadding;
+	}
+
+	public void setValue(int x, int y, int z, double val){
+		voxelArray[(z * dimensions[1] + y) * dimensions[0] + x] = val ;
+	}
+
+	public void setValueByInd(int i, double val){
+		voxelArray[i] = val ;
 	}
 
 }

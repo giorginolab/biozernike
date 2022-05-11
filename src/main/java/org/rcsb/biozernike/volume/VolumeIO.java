@@ -129,7 +129,8 @@ public class VolumeIO {
 				os.writeInt(0);
 			}
 			/* ORIGIN */
-			os.writeFloat(0);
+			os.writeFloat(0); //l'origine è la coordinata del voxel di indice 0,0,0
+			//(-dims[0])*gridWidth/2 //PROVA
 			os.writeFloat(0);
 			os.writeFloat(0);
 		}
