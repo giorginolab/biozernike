@@ -1,7 +1,7 @@
 package org.rcsb.biozernike;
 
 import org.rcsb.biozernike.volume.Volume;
-import org.apache.commons.lang.ArrayUtils;
+import org.jheaps.DoubleEndedAddressableHeap;
 import org.junit.Test;
 import org.rcsb.biozernike.volume.MapFileType;
 import org.rcsb.biozernike.volume.VolumeIO;
@@ -10,15 +10,14 @@ import org.rcsb.biozernike.zernike.ZernikeMoments;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
-
-import javax.activation.FileTypeMap;
-import javax.vecmath.Matrix4d;
-
 import org.rcsb.biozernike.complex.Complex;
+import org.rcsb.biozernike.descriptor.Descriptor;
+import org.rcsb.biozernike.descriptor.DescriptorConfig;
+import org.rcsb.biozernike.descriptor.DescriptorMode;
 
 public class TestShape {
     
@@ -30,31 +29,146 @@ public class TestShape {
         volume.createFromData(dims, voxels,1.0);
         volume.resetVoxels();
         createCube(dims, 3.0, volume);
+        System.out.println("Moments for Cube\n");
         calculateMomentsAndWriteVolume(volume, "shapes/cube.mrc");
+        System.out.println("Descriptors for Cube\n");
+        calcDescriptor(volume);
     }
 
     @Test
     public void testCube1(){
-        int [] dims = new int[] {60,60,60};
+        int [] dims = new int[] {100,100,100};
         double[] voxels = new double[dims[0]*dims[1]*dims[2]];
         Volume volume = new Volume();
         volume.createFromData(dims, voxels,1.0);
         volume.resetVoxels();
         createCube(dims, 21.0, volume);
+        System.out.println("Moments for cube1\n");
         calculateMomentsAndWriteVolume(volume, "shapes/cube1.mrc");
+        System.out.println("Descriptors for cube1\n");
+        calcDescriptor(volume);
         
+    }
+
+    public double[] AllCubes(int l){
+        int [] dims = new int[] {100,100,100};
+        double[] voxels = new double[dims[0]*dims[1]*dims[2]];
+        Volume volume = new Volume();
+        volume.createFromData(dims, voxels,1.0);
+        volume.resetVoxels();
+        createCube(dims, l, volume);
+        volume.updateCenter();
+        return calcDescriptor(volume);
+    }
+
+    private boolean checkNan(double[] descriptors){
+        boolean results = false;
+        for(int i=0; i<descriptors.length; i++){
+            results = Double.isNaN(descriptors[i]);
+        }
+        return results;
+    }
+
+    public void Loop(){
+        FileWriter fileWriter;
+        try {
+            fileWriter = new FileWriter("cubes.txt");
+            for(int i = 2; i<50; i+=2){
+                double[] descriptors = AllCubes(i);
+                if(!checkNan(descriptors)){
+                    fileWriter.write(i + " ");
+                    for(int j = 0; j<descriptors.length; j++){
+                        fileWriter.write(descriptors[j]+ " ");
+                    }
+                }
+                System.out.println("Ho scritto il cubo " + i + "\n");
+                fileWriter.write("\n");
+            }
+            fileWriter.close();
+        } catch (IOException e) {
+             e.printStackTrace();
+        }
+    }
+
+
+    public double[] AllCylinders(double r, double h){
+        int [] dims = new int[] {100,100,100};
+        double[] voxels = new double[dims[0]*dims[1]*dims[2]];
+        Volume volume = new Volume();
+        volume.createFromData(dims, voxels,1.0);
+        volume.resetVoxels();
+        createCylinder(dims,r,h, volume);
+        volume.updateCenter();
+        return calcDescriptor(volume);
+    }
+
+    public void LoopCylinder(){
+        FileWriter fileWriter;
+        try {
+            fileWriter = new FileWriter("cylinders.txt");
+            for(int i = 1; i<60; i+=2){
+                double[] descriptors = AllCylinders(i, (i+3)/2);
+                if(!checkNan(descriptors)){
+                    fileWriter.write(i + " ");
+                    for(int j = 0; j<descriptors.length; j++){
+                        fileWriter.write(descriptors[j]+ " ");
+                    }
+                }
+                System.out.println("Ho scritto il cilindro " + i + "\n");
+                fileWriter.write("\n");
+            }
+            fileWriter.close(); 
+        } catch (IOException e) {
+             e.printStackTrace();
+        }
+    }
+
+
+    public double[] AllSpheres(double r){
+        int [] dims = new int[] {100,100,100};
+        double[] voxels = new double[dims[0]*dims[1]*dims[2]];
+        Volume volume = new Volume();
+        volume.createFromData(dims, voxels,1.0);
+        volume.resetVoxels();
+        createSphere(dims, r, volume);
+        volume.updateCenter();
+        return calcDescriptor(volume);
+    }
+
+    public void LoopSphere(){
+        FileWriter fileWriter;
+        try {
+            fileWriter = new FileWriter("spheres.txt");
+            for(int i = 1; i<60; i+=2){
+                double[] descriptors = AllSpheres(i);
+                if(!checkNan(descriptors)){
+                    fileWriter.write(i + " ");
+                    for(int j = 0; j<descriptors.length; j++){
+                        fileWriter.write(descriptors[j]+ " ");
+                    }
+                }
+                System.out.println("Ho scritto la sfera " + i + "\n");
+                fileWriter.write("\n");
+            }
+            fileWriter.close(); 
+        } catch (IOException e) {
+             e.printStackTrace();
+        }
     }
 
 
     @Test
     public void testCube2(){
-        int [] dims = new int[] {60,60,60};
+        int [] dims = new int[] {100,100,100};
         double[] voxels = new double[dims[0]*dims[1]*dims[2]];
         Volume volume = new Volume();
         volume.createFromData(dims, voxels,1.0);
         volume.resetVoxels();
         createCube(dims, 38.0, volume);
+        System.out.println("Moments for cube2\n");
         calculateMomentsAndWriteVolume(volume, "shapes/cube2.mrc");
+        System.out.println("Descriptors for cube2\n");
+        calcDescriptor(volume);
     }
 
 
@@ -67,49 +181,66 @@ public class TestShape {
         volume.createFromData(dims, voxels,1.0);
         volume.resetVoxels();
         createCylinder(dims, 3.0,9.0, volume);
+        System.out.println("Moments for cylinder\n");
+        calculateMomentsAndWriteVolume(volume, "shapes/cylinder.mrc");
+        System.out.println("Descriptors for cylinder\n");
+        calcDescriptor(volume);
     }
 
     @Test
     public void testCylinder1(){ 
-        int [] dims = new int[] {80,80,80};
+        int [] dims = new int[] {150,150,150};
         double[] voxels = new double[dims[0]*dims[1]*dims[2]];
         Volume volume = new Volume();
         volume.createFromData(dims, voxels,1.0);
         volume.resetVoxels();
-        createCylinder(dims, 12.0,51.0, volume);
-        List<List<List<Complex>>> momentcylinder = calculateMomentsAndWriteVolume(volume, "shapes/cylinder.mrc");
+        createCylinder(dims, 5.0,7.0, volume);
+        System.out.println("Moments for cylinder1\n");
+        List<List<List<Complex>>> momentcylinder = calculateMomentsAndWriteVolume(volume, "shapes/cylinder1.mrc");
+        System.out.println("Descriptors for cylinder1\n");
+        double[] descriptorCylinder = calcDescriptor(volume);
+       
 
         //rotate
         Volume vrot = rotate(dims[0], volume);
-        System.out.println("Descriptors for cylinder (rotate)");
-        List<List<List<Complex>>> momentRot = calculateMomentsAndWriteVolume(vrot, "shapes/cilindroRuotato.mrc");
-
-        double[] momentcylinderArr = ArrayUtils.toPrimitive(
-				ZernikeMoments.flattenMomentsDouble(
-						momentcylinder).
-						toArray(new Double[0]));
-
-        double[] momentRotArr = ArrayUtils.toPrimitive(
-                ZernikeMoments.flattenMomentsDouble(
-                        momentRot).
-                        toArray(new Double[0]));
-       
+        System.out.println("Moments for cylinder (rotate)");
+        List<List<List<Complex>>> momentRot = calculateMomentsAndWriteVolume(vrot, "shapes/cilindroRuotato1.mrc");
+        System.out.println("Descriptors for cylinder1 (rotate)");
+        double[] descriptorRotate = calcDescriptor(vrot);
         
-       //assertArrayEquals(momentcylinderArr,momentRotArr,1e-10);
+        assertArrayEquals(descriptorCylinder, descriptorRotate,1e-9);
 
        //translate
 
-       Volume vtran = translate(dims[0], volume);
+        Volume vtran = translate(dims[0], volume);
+        System.out.println("Moments for cylinder (translate)");
+        List<List<List<Complex>>> momentTran = calculateMomentsAndWriteVolume(vtran, "shapes/cilindroTraslato1.mrc");
         System.out.println("Descriptors for cylinder (translate)");
-        List<List<List<Complex>>> momentTran = calculateMomentsAndWriteVolume(vtran, "shapes/cilindroTraslato.mrc");
+        double [] descriptorTranslate = calcDescriptor(vtran);
 
+        assertArrayEquals(descriptorCylinder, descriptorTranslate,1e-9);
 
-        double[] momentTranArr = ArrayUtils.toPrimitive(
-                ZernikeMoments.flattenMomentsDouble(
-                        momentTran).
-                        toArray(new Double[0]));
-        
-        assertArrayEquals(momentcylinderArr,momentTranArr,1e-10);
+        //write file
+        FileWriter f;
+        try {
+            f = new FileWriter("invarianza.txt");
+            for(int j = 0; j<descriptorCylinder.length; j++){
+                f.write(descriptorCylinder[j]+ " ");
+            }
+            f.write("\n");
+            for(int j = 0; j<descriptorRotate.length; j++){
+                f.write(descriptorRotate[j]+ " ");
+            }
+            f.write("\n");
+            for(int j = 0; j<descriptorTranslate.length; j++){
+                f.write(descriptorTranslate[j]+ " ");
+            }
+            f.write("\n");
+            f.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+      
         
     }
 
@@ -121,7 +252,23 @@ public class TestShape {
         volume.createFromData(dims, voxels,1.0);
         volume.resetVoxels();
         createSphere(dims, 8.0, volume);
+        System.out.println("Moments for sphere\n");
         calculateMomentsAndWriteVolume(volume, "shapes/sphere.mrc");
+        System.out.println("Descriptors for sphere\n");
+        calcDescriptor(volume);
+    }
+
+    public void testSphereNegative(){ 
+        int [] dims = new int[] {100,100,100};
+        double[] voxels = new double[dims[0]*dims[1]*dims[2]];
+        Volume volume = new Volume();
+        volume.createFromData(dims, voxels,1.0);
+        volume.resetVoxels();
+        createNegativeSphere(dims, 30.0, volume);
+        System.out.println("Moments for sphere negative\n");
+        calculateMomentsAndWriteVolume(volume, "shapes/sphereNegative.mrc");
+        System.out.println("Descriptors for sphere negative\n");
+        calcDescriptor(volume);
     }
 
 
@@ -130,9 +277,13 @@ public class TestShape {
         double[] voxels = new double[dims[0]*dims[1]*dims[2]];
         Volume volume = new Volume();
         volume.createFromData(dims, voxels,1.0);
+        //volume.setAllVoxels(-1.0);
         volume.resetVoxels();
-        createSphere(dims, 3.0, volume);
+        createSphere(dims, 30.0, volume);
+        System.out.println("Moments for sphere1\n");
         calculateMomentsAndWriteVolume(volume, "shapes/sphere1.mrc");
+        System.out.println("Descriptors for sphere1\n");
+        calcDescriptor(volume);
     }
 
     public void testSphere2(){
@@ -142,11 +293,15 @@ public class TestShape {
         volume.createFromData(dims, voxels,1.0);
         volume.resetVoxels();
         createSphere(dims, 12.0, volume);
+        System.out.println("Moments fot sphere2\n");
         calculateMomentsAndWriteVolume(volume, "shapes/sphere2.mrc");
+        System.out.println("Descriptors for sphere2\n");
+        calcDescriptor(volume);
     }
 
     public  List<List<List<Complex>>> calculateMomentsAndWriteVolume(Volume volume, String nameFile)  {
 		volume.updateCenter(); 
+        int i = 0;
         try{
             VolumeIO.write(volume, new File(nameFile), MapFileType.MRC); 
         }catch(IOException e){
@@ -154,9 +309,33 @@ public class TestShape {
         }
         ZernikeMoments z = new ZernikeMoments(volume, 3); 
         List<List<List<Complex>>> originalMoments = z.getOriginalMoments();
-        System.out.println(ZernikeMoments.flattenMomentsDouble(originalMoments));
+        for(List<List<Complex>> moment :originalMoments){
+            System.out.println("order " + i + " :" + moment);
+            i++;
+        }
         return originalMoments;
     }
+
+    public double[] calcDescriptor(Volume volume){
+        
+        EnumSet<DescriptorMode> mode = EnumSet.allOf(DescriptorMode.class);
+        int i;
+		DescriptorConfig config;
+        try {
+            config = new DescriptorConfig(DescriptorTest.class.getResourceAsStream("/descriptor.properties"), mode);
+            Descriptor ssd = new Descriptor(volume,config);
+            System.out.println("DESCRITTORI");
+            ssd.getMomentDescriptor();
+            for(i = 0; i<ssd.getMomentDescriptor().length; i++){
+                System.out.print(ssd.getMomentDescriptor()[i] + "\n ");  
+            }
+            return ssd.getMomentDescriptor();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     public void createCube(int[] dims, double l, Volume volume){
         for(int z = 0; z < dims[2]; z++){
@@ -172,14 +351,25 @@ public class TestShape {
 
     }
 
-
-
     public void createSphere(int[] dims, double r, Volume volume){
         for(int z = 0; z < dims[2]; z++){
             for(int y = 0; y < dims[1]; y++){
                 for(int x = 0; x < dims[0]; x++){
                     if( Math.sqrt(Math.pow(x-dims[0]/2,2)+Math.pow(y-dims[1]/2,2)+ Math.pow(z-dims[2]/2, 2)) <= r ){ 
                         volume.setValue(x, y, z, 1.0);
+                    }
+                }
+
+            }
+        }
+    }
+
+    public void createNegativeSphere(int[] dims, double r, Volume volume){
+        for(int z = 0; z < dims[2]; z++){
+            for(int y = 0; y < dims[1]; y++){
+                for(int x = 0; x < dims[0]; x++){
+                    if( Math.sqrt(Math.pow(x-dims[0]/2,2)+Math.pow(y-dims[1]/2,2)+ Math.pow(z-dims[2]/2, 2)) <= r ){ 
+                        volume.setValue(x, y, z, -2.0);
                     }
                 }
 
@@ -256,22 +446,18 @@ public class TestShape {
 
     public static void main(String[] args) {
         TestShape t = new TestShape();
-        /*System.out.println("Descriptors for cube:");
-        t.testCube();
-        System.out.println("Descriptors for cube1:");
+        /*t.testCube();
         t.testCube1();
-        System.out.println("Descriptors for cube 2:");
         t.testCube2();
-        System.out.println("Descriptors for sphere");
         t.testSphere();
-        System.out.println("Descriptors for sphere1");
         t.testSphere1();
-        System.out.println("Descriptors for sphere2");
         t.testSphere2();
-        System.out.println("Descriptors for cylinder");
+        t.testSphereNegative();
         t.testCylinder();*/
-        System.out.println("Descriptors for cylinder1");
         t.testCylinder1();
+        //t.Loop();
+        //t.LoopCylinder();
+        //t.LoopSphere();
        
     }
 }
