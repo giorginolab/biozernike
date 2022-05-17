@@ -401,7 +401,7 @@ public class Volume {
 				for (int x = 0; x < dimensions[0]; ++x) {
 					double voxelWeight = voxelArray[flatInd];
 
-					if (voxelWeight > 0) {
+					if (voxelWeight != 0) {
 						double mx = x - center[0];
 						double sqRad = mzy2 + mx * mx;
 
@@ -416,8 +416,7 @@ public class Volume {
 			}
 			zInd += dims01;
 		}
-
-		radiusVar = Math.sqrt(weightedRad) * radiusVarMult;
+		radiusVar = Math.sqrt(Math.abs(weightedRad)) * radiusVarMult;
 		radiusMax = Math.sqrt(maxRad);
 	}
 
@@ -662,7 +661,10 @@ public class Volume {
 	}
 
 	public void setValue(int x, int y, int z, double val){
-		voxelArray[(z * dimensions[1] + y) * dimensions[0] + x] = val ;
+		if(x < 0 || y<0 || z<0 || x>=dimensions[0] || y>=dimensions[1] || z>=dimensions[2])
+			System.out.println("Coordinates x,y,z out of bounds\n" + x + " " + y + " " + z + "\n");
+		else
+			voxelArray[(z * dimensions[1] + y) * dimensions[0] + x] = val ;
 	}
 
 	public void setValueByInd(int i, double val){

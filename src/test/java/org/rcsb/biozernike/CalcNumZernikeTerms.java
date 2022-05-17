@@ -20,7 +20,7 @@ public class CalcNumZernikeTerms {
         int countMpositive = 0;
         for (int n = 0; n <= maxOrder; n++) {
             for (int l = 0; l <= n; l++) {
-                if ((n-l)%2 != 0) continue;
+                if ((n-l)%2 != 0)continue;
                 //System.out.print(" " + n + "," + l);
                 countL++;
                 for (int m = -l; m <= l; m++) {

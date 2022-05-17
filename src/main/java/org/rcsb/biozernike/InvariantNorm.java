@@ -234,6 +234,7 @@ public class InvariantNorm {
 			n_abconj = 2;
 		}
 		if (!solver.didConverge()) {
+			System.out.println("qui");
 			logger.info("Ratio of a and b_conjugated did not converge with respect to the ({}, {}) normalisation. " +
 					"There is probably a perfect symmetry of the opposing parity. Use another normalisation for alignment.",
 					indZero,indReal);
@@ -306,6 +307,7 @@ public class InvariantNorm {
 			}
 
 			if (!solver.didConverge()) {
+				System.out.println("qui2");
 				logger.info("Ratio of b_real and b_imaginary did not converge with respect to the ({}, {}) normalisation. " +
 						"There is probably a perfect symmetry of the opposing parity. Use another normalisation for alignment.",
 						indZero,indReal);
@@ -417,6 +419,7 @@ public class InvariantNorm {
 				{
 					Complex moment = moments.getMoment(n, li, m);
 					sum += moment.norm();
+					//System.out.println(" " + n + " "+ l + " " + li + " " + m + " " +moment + " ");
 				}
 				zmInvariants.add(Math.sqrt(sum));
 			}

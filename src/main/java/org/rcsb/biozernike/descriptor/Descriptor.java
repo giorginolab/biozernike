@@ -173,6 +173,7 @@ public class Descriptor {
 			for (int selIndex : selIndices) {
 				momentDescriptorList.add(normedMoments.get(selIndex));
 			}
+
 		}
 		momentDescriptor = momentDescriptorList.stream().mapToDouble(d -> d).toArray();
 	}
@@ -181,6 +182,7 @@ public class Descriptor {
 		momentInvariantsRaw = new ArrayList<>();
 
 		for (int normOrder : config.normOrders) {
+			
 			momentInvariantsRaw.add(new ArrayList<>(normalization.getInvariants(normOrder)));
 		}
 	}
