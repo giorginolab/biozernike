@@ -61,13 +61,6 @@ public class TestShape {
         return calcDescriptor(volume);
     }
 
-    /*private boolean checkNan(double[] descriptors){
-        boolean results = false;
-        for(int i=0; i<descriptors.length; i++){
-            results = Double.isNaN(descriptors[i]);
-        }
-        return results;
-    }*/
 
     public void Loop(){
         FileWriter fileWriter;
@@ -117,6 +110,59 @@ public class TestShape {
         }
     }
 
+
+    public Volume rotateCylinders(double angle, int[] t, Volume volume, int n){ 
+        double[][] rot = {{Math.cos(angle),-Math.sin(angle),0},{Math.sin(angle),Math.cos(angle),0},{0,0,1}};
+        int [] dims = new int[] {n,n,n};
+        double[] voxels = new double[n*n*n];
+        Volume vrot = new Volume();
+        vrot.createFromData(dims, voxels,1.0);
+        vrot.resetVoxels();
+            
+        int xp,yp,zp;
+        //[x', y', z']=rot*[x,y,z] + t
+        for(int z = 0; z<n; z++){
+            for(int y = 0; y<n; y++){
+                for(int x = 0; x<n; x++){
+                    if(volume.getValue(x, y, z)==1){
+                        xp = (int)(x*rot[0][0]+y*rot[0][1]+z*rot[0][2] + t[0]);
+                        yp = (int)(x*rot[1][0]+y*rot[1][1]+z*rot[1][2] + t[1]);
+                        zp = (int)(x*rot[2][0]+y*rot[2][1]+z*rot[2][2] + t[2]);
+                        vrot.setValue(xp, yp, zp, volume.getValue(x, y, z));  
+                    }
+                }
+            }
+        }
+        return vrot;
+    }
+
+    public void LoopRotate(){
+        FileWriter fileWriter;
+        int[] angles = new int[]{0,6,12,18,24,30,36,42,48,54,60,66,72,78,84,90};
+        int [] dims = new int[] {150,150,150};
+        double[] voxels = new double[dims[0]*dims[1]*dims[2]];
+        Volume volume = new Volume();
+        volume.createFromData(dims, voxels,1.0);
+        volume.resetVoxels();
+        createCylinder(dims,7.0,15.0, volume);
+        volume.updateCenter();
+
+        try {
+            fileWriter = new FileWriter("cylindersRotate.txt");
+            for(int i = 0; i<angles.length; i++){
+                Volume vrot = rotateCylinders((double)(angles[i]*Math.PI)/180, new int[] {i*10,0,0} ,volume, dims[0]);
+                calculateMomentsAndWriteVolume(vrot, "shapes/vrot" + angles[i]+".mrc");
+                double[] descriptors = calcDescriptor(vrot);
+                for(int j = 0; j<descriptors.length; j++){
+                    fileWriter.write(angles[i] + " " + j +  " " + descriptors[j]+ "\n");
+                }
+                System.out.println("Ho scritto il cilindro ruotato con angolo " + angles[i] + "\n");
+            }
+            fileWriter.close(); 
+        } catch (IOException e) {
+             e.printStackTrace();
+        }
+    }
 
     public double[] AllSpheres(double r){
         int [] dims = new int[] {100,100,100};
@@ -189,16 +235,6 @@ public class TestShape {
         List<List<List<Complex>>> momentcylinder = calculateMomentsAndWriteVolume(volume, "shapes/cylinder1.mrc");
         System.out.println("Descriptors for cylinder1\n");
         double[] descriptorCylinder = calcDescriptor(volume);
-       
-
-        //rotate
-        Volume vrot = rotate(dims[0], volume);
-        System.out.println("Moments for cylinder (rotate)");
-        List<List<List<Complex>>> momentRot = calculateMomentsAndWriteVolume(vrot, "shapes/cilindroRuotato1.mrc");
-        System.out.println("Descriptors for cylinder1 (rotate)");
-        double[] descriptorRotate = calcDescriptor(vrot);
-        
-        //assertArrayEquals(descriptorCylinder, descriptorRotate,1e-9);
 
        //translate
 
@@ -210,26 +246,6 @@ public class TestShape {
 
         //assertArrayEquals(descriptorCylinder, descriptorTranslate,1e-9);
 
-        //write files
-        FileWriter f;
-        try {
-            f = new FileWriter("invarianza.txt");
-            for(int j = 0; j<descriptorCylinder.length; j++){
-                f.write(descriptorCylinder[j]+ " ");
-            }
-            f.write("\n");
-            for(int j = 0; j<descriptorRotate.length; j++){
-                f.write(descriptorRotate[j]+ " ");
-            }
-            f.write("\n");
-            for(int j = 0; j<descriptorTranslate.length; j++){
-                f.write(descriptorTranslate[j]+ " ");
-            }
-            f.write("\n");
-            f.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
       
         
     }
@@ -311,12 +327,12 @@ public class TestShape {
         EnumSet<DescriptorMode> mode = EnumSet.of(DescriptorMode.CALCULATE_RAW);
         int i;
 		DescriptorConfig config;
-            //config = new DescriptorConfig(DescriptorTest.class.getResourceAsStream("/descriptor.properties"), mode);
-            config = new DescriptorConfig(10, new int[] {0});
-            Descriptor ssd = new Descriptor(volume,config);
-            List<List<Double>> desc = ssd.getMomentInvariantsRaw();
-            double[] di = desc.get(0).stream().mapToDouble(d -> d).toArray();
-            return di;
+        //config = new DescriptorConfig(DescriptorTest.class.getResourceAsStream("/descriptor.properties"), mode);
+        config = new DescriptorConfig(20, new int[] {0});
+        Descriptor ssd = new Descriptor(volume,config);
+        List<List<Double>> desc = ssd.getMomentInvariantsRaw();
+        double[] di = desc.get(0).stream().mapToDouble(d -> d).toArray();
+        return di;
         
     }
 
@@ -377,30 +393,6 @@ public class TestShape {
         }
     }
 
-    public Volume rotate(int n, Volume volume){ 
-        int[][] rot = {{1,0,0},{0,0,1},{0,1,0}};
-        int [] dims = new int[] {n,n,n};
-        double[] voxels = new double[n*n*n];
-        Volume vrot = new Volume();
-        vrot.createFromData(dims, voxels,1.0);
-        vrot.resetVoxels();
-        
-        int xp,yp,zp;
-        //[x', y', z']=rot*[x,y,z]
-        for(int z = 0; z<n; z++){
-            for(int y = 0; y<n; y++){
-                for(int x = 0; x<n; x++){
-                        if(volume.getValue(x, y, z)==1){
-                            xp = x*rot[0][0]+y*rot[0][1]+z*rot[0][2];
-                            yp = x*rot[1][0]+y*rot[1][1]+z*rot[1][2];
-                            zp = x*rot[2][0]+y*rot[2][1]+z*rot[2][2];
-                            vrot.setValue(xp, yp, zp, volume.getValue(x, y, z));  
-                        }
-                }
-            }
-        }
-        return vrot;
-    }
 
     public Volume translate(int n, Volume volume){ 
         int t[] = {10,10,10}; //vettore di traslazione
@@ -430,8 +422,8 @@ public class TestShape {
 
     public static void main(String[] args) {
         TestShape t = new TestShape();
-        t.testCube();
-        t.testCube1();
+        //t.testCube();
+        /*t.testCube1();
         t.testCube2();
         t.testSphere();
         t.testSphere1();
@@ -441,7 +433,8 @@ public class TestShape {
         t.testCylinder1();
         t.Loop();
         t.LoopCylinder();
-        t.LoopSphere();
+        t.LoopSphere();*/
+        t.LoopRotate();
        
     }
 }

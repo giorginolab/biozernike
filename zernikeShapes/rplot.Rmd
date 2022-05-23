@@ -1,0 +1,139 @@
+---
+title: "shapes"
+output: html_document
+date: '2022-05-12'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(gplots)
+```
+
+
+```{r}
+createNLcolumns <- function(dataframe, order){
+  nList <- vector(mode="list")
+  liList <- vector(mode="list")
+  lList <- vector(mode="list")
+  for(n in 0:order){
+    for (li in 0:(n%/%2)){
+	     nList <- append(nList, n)
+	     liList <- append(liList, li)
+	     lList <- append(lList, li*2 + as.numeric(n%%2!=0))
+	  }
+  }
+  
+  nList <- rep(nList, nrow(dataframe)/length(nList))
+  liList <- rep(liList, nrow(dataframe)/length(liList))
+  lList <- rep(lList, nrow(dataframe)/length(lList))
+  new_cols <- data.frame("n"=unlist(nList), "li"=unlist(liList), "l"=unlist(lList))
+  return(new_cols)
+  
+}
+```
+
+
+```{r}
+createIndexName <- function(dataframe){
+  vec <- vector(mode = "list")
+  for(i in 1:nrow(dataframe)){
+    vec <- append(vec, paste("z",dataframe$n[i],",",dataframe$l[i], sep=""))
+  }
+  return(vec)
+    
+}
+```
+
+
+```{r}
+Cubes <- read.delim("cubes.txt", header = FALSE, sep = " ", dec = ".")
+colnames(Cubes)<- c("Side", "Index", "Descriptor")
+new_col <-createNLcolumns(Cubes, 20)
+Cubes <- cbind(Cubes, new_col)
+Cubes <- cbind(Cubes, "z" = unlist(createIndexName(Cubes)))
+
+#Cubes$z <- factor(Cubes$z)
+ggplot(Cubes,aes(y=Side, x=reorder(z,Index), fill=Descriptor)) + 
+  geom_raster()+
+  scale_fill_viridis_c()+
+  ggtitle("Descriptors for cubes")+
+  #scale_x_discrete(guide=guide_axis(n.dodge=5)) cosi li vediamo tutti ma su livelli diversi
+  scale_x_discrete(breaks = function(x){x[c(TRUE,FALSE,FALSE,FALSE)]})+ #cosi vediamo un'etichetta ogni 4
+  labs(x="z")
+
+#heatmap(as.matrix(Cubes),Colv = NA, Rowv = NA, 
+#        xlab="descriptors", ylab="side", main="heatmap for Cubes descriptors")
+
+
+
+```
+```{r}
+Cylinders <- read.delim("cylinders.txt", header = FALSE, sep = " ", dec = ".")
+Cylinders$RadiusOnHeight <- Cylinders$V1/Cylinders$V2 
+colnames(Cylinders)<- c("Radius", "Height", "Index", "Descriptor", "RadiusOnEight")
+new_col <-createNLcolumns(Cylinders, 20)
+Cylinders <- cbind(Cylinders, new_col)
+Cylinders <- cbind(Cylinders, "z" = unlist(createIndexName(Cylinders)))
+
+
+ggplot(Cylinders,aes(y=Radius, x=reorder(z,Index), fill=Descriptor)) + 
+  geom_raster()+
+  scale_fill_viridis_c()+
+  ggtitle("Descriptors for cylinders") +
+  scale_x_discrete(breaks = function(x){x[c(TRUE,FALSE,FALSE,FALSE)]})+
+  labs(x="z")
+
+
+
+#heatmap(as.matrix(Cylinders),Colv = NA, Rowv = NA, 
+#        xlab="descriptors", ylab="side", main="heatmap for cylinders descriptors")
+
+
+```
+```{r}
+Data <- read.delim("spheres.txt", header = FALSE, sep = " ", dec = ".")
+colnames(Data)<- c("Radius", "Index", "Descriptor")
+new_col <-createNLcolumns(Data, 20)
+Data <- cbind(Data, new_col)
+Data <- cbind(Data, "z" = unlist(createIndexName(Data)))
+
+
+ggplot(Data,aes(y=Radius, x=reorder(z,Index), fill=Descriptor)) + 
+  geom_raster()+
+  scale_fill_viridis_c()+
+  ggtitle("Descriptors for spheres")+
+  scale_x_discrete(breaks = function(x){x[c(TRUE,FALSE,FALSE,FALSE)]})+
+  labs(x="z")
+
+
+
+#heatmap(as.matrix(Data),Colv = NA, Rowv = NA, 
+#        xlab="descriptors", ylab="side", main="heatmap for spheres descriptors")
+
+
+```
+
+
+```{r}
+
+DataRot <- read.delim("cylindersRotate.txt", header = FALSE, sep = " ", dec = ".")
+colnames(DataRot)<- c("Angle", "Index", "Descriptor")
+new_col <-createNLcolumns(DataRot, 20)
+DataRot <- cbind(DataRot, new_col)
+DataRot <- cbind(DataRot, "z" = unlist(createIndexName(DataRot)))
+
+
+ggplot(DataRot,aes(y=Angle, x=reorder(z,Index), fill=Descriptor)) + 
+  geom_raster()+
+  scale_fill_viridis_c()+
+  ggtitle("Descriptors for cylinder rotations")+
+  scale_x_discrete(breaks = function(x){x[c(TRUE,FALSE,FALSE,FALSE)]})+
+  labs(x="z")
+  
+
+
+
+
+```
+
