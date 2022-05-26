@@ -42,7 +42,7 @@ public class TestShape {
         Volume volume = new Volume();
         volume.createFromData(dims, voxels,1.0);
         volume.resetVoxels();
-        createCube(dims, 21.0, volume);
+        createCube(dims, 26.0, volume);
         System.out.println("Moments for cube1\n");
         calculateMomentsAndWriteVolume(volume, "shapes/cube1.mrc");
         System.out.println("Descriptors for cube1\n");
@@ -111,24 +111,30 @@ public class TestShape {
     }
 
 
-    public Volume rotateCylinders(double angle, int[] t, Volume volume, int n){ 
-        double[][] rot = {{Math.cos(angle),-Math.sin(angle),0},{Math.sin(angle),Math.cos(angle),0},{0,0,1}};
+    public Volume rotateShapeXZ(double angle, Volume volume, int n){ 
+        double[][] rot = {{Math.cos(angle),0, -Math.sin(angle)},
+                        {0,1,0},
+                        {Math.sin(angle),0, Math.cos(angle)}};
         int [] dims = new int[] {n,n,n};
         double[] voxels = new double[n*n*n];
         Volume vrot = new Volume();
         vrot.createFromData(dims, voxels,1.0);
         vrot.resetVoxels();
             
-        int xp,yp,zp;
+        double xp,yp,zp;
+        double xm, ym, zm;
         //[x', y', z']=rot*[x,y,z] + t
         for(int z = 0; z<n; z++){
             for(int y = 0; y<n; y++){
                 for(int x = 0; x<n; x++){
+                    xm = x-n/2;
+                    ym = y-n/2;
+                    zm = z-n/2;
                     if(volume.getValue(x, y, z)==1){
-                        xp = (int)(x*rot[0][0]+y*rot[0][1]+z*rot[0][2] + t[0]);
-                        yp = (int)(x*rot[1][0]+y*rot[1][1]+z*rot[1][2] + t[1]);
-                        zp = (int)(x*rot[2][0]+y*rot[2][1]+z*rot[2][2] + t[2]);
-                        vrot.setValue(xp, yp, zp, volume.getValue(x, y, z));  
+                        xp = (xm*rot[0][0]+ym*rot[0][1]+zm*rot[0][2]) + n/2;
+                        yp = (xm*rot[1][0]+ym*rot[1][1]+zm*rot[1][2]) + n/2;
+                        zp = (xm*rot[2][0]+ym*rot[2][1]+zm*rot[2][2]) + n/2;
+                        vrot.setValue((int)xp, (int)yp, (int)zp, 1);  
                     }
                 }
             }
@@ -138,19 +144,19 @@ public class TestShape {
 
     public void LoopRotate(){
         FileWriter fileWriter;
-        int[] angles = new int[]{0,6,12,18,24,30,36,42,48,54,60,66,72,78,84,90};
+        double[] angles = new double[]{0,6,12,18,24,30,36,42,48,54,60,66,72,78,84,90};
         int [] dims = new int[] {150,150,150};
         double[] voxels = new double[dims[0]*dims[1]*dims[2]];
         Volume volume = new Volume();
         volume.createFromData(dims, voxels,1.0);
         volume.resetVoxels();
-        createCylinder(dims,7.0,15.0, volume);
+        createCylinder(dims,27.0,40.0, volume);
         volume.updateCenter();
 
         try {
             fileWriter = new FileWriter("cylindersRotate.txt");
             for(int i = 0; i<angles.length; i++){
-                Volume vrot = rotateCylinders((double)(angles[i]*Math.PI)/180, new int[] {i*10,0,0} ,volume, dims[0]);
+                Volume vrot = rotateShapeXZ((angles[i]*Math.PI)/180,volume, dims[0]);
                 calculateMomentsAndWriteVolume(vrot, "shapes/vrot" + angles[i]+".mrc");
                 double[] descriptors = calcDescriptor(vrot);
                 for(int j = 0; j<descriptors.length; j++){
@@ -230,7 +236,7 @@ public class TestShape {
         Volume volume = new Volume();
         volume.createFromData(dims, voxels,1.0);
         volume.resetVoxels();
-        createCylinder(dims, 5.0,7.0, volume);
+        createCylinder(dims, 15.0,37.0, volume);
         System.out.println("Moments for cylinder1\n");
         List<List<List<Complex>>> momentcylinder = calculateMomentsAndWriteVolume(volume, "shapes/cylinder1.mrc");
         System.out.println("Descriptors for cylinder1\n");
@@ -422,16 +428,16 @@ public class TestShape {
 
     public static void main(String[] args) {
         TestShape t = new TestShape();
-        //t.testCube();
-        /*t.testCube1();
+        /*t.testCube();
+        t.testCube1();
         t.testCube2();
         t.testSphere();
         t.testSphere1();
-        t.testSphere2();
-        t.testSphereNegative();
-        t.testCylinder();
-        t.testCylinder1();
-        t.Loop();
+        t.testSphere2();*/
+        //t.testSphereNegative();
+        /*t.testCylinder();
+        t.testCylinder1();*/
+        /*t.Loop();
         t.LoopCylinder();
         t.LoopSphere();*/
         t.LoopRotate();
