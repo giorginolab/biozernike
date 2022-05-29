@@ -123,6 +123,7 @@ public class TestShape {
             
         double xp,yp,zp;
         double xm, ym, zm;
+        int xx, yy, zz;
         //[x', y', z']=rot*[x,y,z] + t
         for(int z = 0; z<n; z++){
             for(int y = 0; y<n; y++){
@@ -130,12 +131,16 @@ public class TestShape {
                     xm = x-n/2;
                     ym = y-n/2;
                     zm = z-n/2;
-                    if(volume.getValue(x, y, z)==1){
-                        xp = (xm*rot[0][0]+ym*rot[0][1]+zm*rot[0][2]) + n/2;
-                        yp = (xm*rot[1][0]+ym*rot[1][1]+zm*rot[1][2]) + n/2;
-                        zp = (xm*rot[2][0]+ym*rot[2][1]+zm*rot[2][2]) + n/2;
-                        vrot.setValue((int)xp, (int)yp, (int)zp, 1);  
+                    xp = (xm*rot[0][0]+ym*rot[0][1]+zm*rot[0][2]) + n/2;
+                    yp = (xm*rot[1][0]+ym*rot[1][1]+zm*rot[1][2]) + n/2;
+                    zp = (xm*rot[2][0]+ym*rot[2][1]+zm*rot[2][2]) + n/2;
+                    xx = (int)Math.round(xp);
+                    yy = (int)Math.round(yp);
+                    zz = (int)Math.round(zp);
+                    if(xx >=0 && yy>=0 && zz>=0 && xx<n && yy<n && zz<n){
+                        vrot.setValue(x, y, z, volume.getValue(xx,yy,zz)); 
                     }
+                        
                 }
             }
         }
