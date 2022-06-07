@@ -10,7 +10,7 @@ import java.io.File;
 import org.rcsb.biozernike.volume.Volume;
 import org.biojava.nbio.structure.Atom;
 
-
+//input /home/org305/biozernike/DATASET/O94760/01_h_pocket1.pdb
 
 public class TestGENEONET {
     public static void main(String[] args) {
@@ -32,7 +32,7 @@ public class TestGENEONET {
 
             VolumeIO.write(volume, new File("fromPDBtoMRC.mrc"), MapFileType.MRC); 
             double[] descriptors = c.calcDescriptor(volume, Integer.parseInt(args[1]));
-            c.writeDescriptors(descriptors, args[2]);
+            c.writeDescriptors(descriptors, args[2], Integer.parseInt(args[1]));
         } catch (Exception e){
             e.printStackTrace();  
         }

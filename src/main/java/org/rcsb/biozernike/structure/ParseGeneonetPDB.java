@@ -3,22 +3,12 @@ package org.rcsb.biozernike.structure;
 import org.rcsb.biozernike.volume.Volume;
 import org.biojava.nbio.structure.Atom;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import org.rcsb.biozernike.descriptor.Descriptor;
 import org.rcsb.biozernike.descriptor.DescriptorConfig;
-import org.rcsb.biozernike.descriptor.DescriptorMode;
 
 public class ParseGeneonetPDB {
 
@@ -98,26 +88,40 @@ public class ParseGeneonetPDB {
     public void fillVoxels(Atom[] atoms, double[] gridWidths, Volume volume, int[] dims, int padding){
         double[] min = getMin(atoms);
         int idx, idy, idz;
-            for(Atom atom:atoms){
-                idx = (int)Math.round((atom.getX()-min[0])/gridWidths[0])+padding;
-                idy = (int)Math.round((atom.getY()-min[1])/gridWidths[1])+padding;
-                idz = (int)Math.round((atom.getZ()-min[2])/gridWidths[2])+padding;
-                volume.setValue(idx, idy, idz, 1.0);
-            }
+        for(Atom atom:atoms){
+            idx = (int)Math.round((atom.getX()-min[0])/gridWidths[0])+padding;
+            idy = (int)Math.round((atom.getY()-min[1])/gridWidths[1])+padding;
+            idz = (int)Math.round((atom.getZ()-min[2])/gridWidths[2])+padding;
+            volume.setValue(idx, idy, idz, 1.0);
+        }
     }
 
 
-    public void writeDescriptors(double[] descriptors, String nameFile){
+    public void writeDescriptors(double[] descriptors, String nameFile, int order){
         FileWriter fileWriter;
+        int j = 0;
+
         try {
             fileWriter = new FileWriter(nameFile);
-            for(int j = 0; j<descriptors.length; j++){
-                fileWriter.write(j + " " + descriptors[j]+ "\n");
+            fileWriter.write("Index Descriptor n l z\n");
+            for(int n = 0; n<=order; n++){
+                for(int k = 0; k<=(n/2); k++){
+                    int l = k*2+(int)((n%2!=0) ? 1 : 0);
+                    fileWriter.write(j + " " 
+                    + descriptors[j]+ " " 
+                    + n + " " 
+                    + l + " " +
+                    "z"+n+","+l
+                    +  "\n");
+                    j++;
+                }
             }
             fileWriter.close();
         } catch (IOException e) {
              e.printStackTrace();
         }
+      
+  
     }
 
 
@@ -130,5 +134,8 @@ public class ParseGeneonetPDB {
         return di;
         
     }
+
+
+    
 
 }

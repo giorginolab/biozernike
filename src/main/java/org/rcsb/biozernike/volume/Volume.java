@@ -521,6 +521,9 @@ public class Volume {
 	}
 
 	public double getValue(int x, int y, int z) {
+		if(x < 0 || y<0 || z<0 || x>=dimensions[0] || y>=dimensions[1] || z>=dimensions[2]){
+			System.out.println("getValue: out of bound " + x + " " + y + " " +z + "\n");
+		}
 		return voxelArray[(z * dimensions[1] + y) * dimensions[0] + x];
 	}
 
