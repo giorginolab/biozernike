@@ -18,12 +18,14 @@ public class StructurePQR {
     private ArrayList<Double> y;
     private ArrayList<Double> z;
     private ArrayList<Double> radius;
+    private double gridWidth;
 
-    public StructurePQR(String s){
+    public StructurePQR(String s, double gridWidth){
         x = new ArrayList<>();
         y = new ArrayList<>();
         z = new ArrayList<>();
         radius = new ArrayList<>();
+        this.gridWidth = gridWidth;
         read(s);
     }
 
@@ -32,22 +34,16 @@ public class StructurePQR {
             FileReader fr = new FileReader(s);
             BufferedReader br = new BufferedReader(fr);
             String line;
-            String split = " ";
+            String split = "\\s+";
 
             while((line=br.readLine())!=null){
                 String[] parts = line.split(split);
+                
                 if(parts[0].equals("ATOM")){
-                    if(parts[5].isEmpty()){
-                        x.add(Double.parseDouble(parts[22]));
-                        y.add(Double.parseDouble(parts[25]));
-                        z.add(Double.parseDouble(parts[27]));
-                        radius.add(Double.parseDouble(parts[36]));
-                    }else{
-                        x.add(Double.parseDouble(parts[21]));
-                        y.add(Double.parseDouble(parts[24]));
-                        z.add(Double.parseDouble(parts[26]));
-                        radius.add(Double.parseDouble(parts[35]));
-                    }
+                    x.add(Double.parseDouble(parts[5]));
+                    y.add(Double.parseDouble(parts[6]));
+                    z.add(Double.parseDouble(parts[7]));
+                    radius.add(Double.parseDouble(parts[9]));
                 }
             }
         }catch(FileNotFoundException e){
@@ -111,22 +107,23 @@ public class StructurePQR {
         double[] max = getMax();
 
         for(int i = 0; i<3; i++){
-            dims[i] = (int)((max[i]-min[i])+2*padding);
+            dims[i] = (int)(((max[i]-min[i])/gridWidth)+2*padding);
         }
         return dims;
     }
 
     public void fillVoxels(Volume volume, int[] dims, int padding){
         double[] min = getMin();
-        double idx, idy, idz;
-        for(int i = 0; i<dims[0]; i++){
-            for(int j = 0; j<dims[1]; j++){
+        double coordx, coordy, coordz;
+        for(int i = 0; i<dims[0]; i++){ 
+             for(int j = 0; j<dims[1]; j++){
                 for(int k = 0; k<dims[2]; k++){
                     for(int h = 0; h< x.size(); h++){
-                        idx = i-padding + min[0];
-                        idy = j-padding + min[1];
-                        idz = k-padding + min[2];
-                        if( Math.sqrt(Math.pow(idx-x.get(h),2)+Math.pow(idy-y.get(h),2)+ Math.pow(idz-z.get(h), 2)) <= radius.get(h) ){ 
+                        coordx = (i-padding)*gridWidth + min[0];
+                        coordy = (j-padding)*gridWidth + min[1];
+                        coordz = (k-padding)*gridWidth + min[2];
+                        if( Math.sqrt(Math.pow(coordx-x.get(h),2)+Math.pow(coordy-y.get(h),2)+ 
+                            Math.pow(coordz-z.get(h), 2)) <= radius.get(h) ){ 
                             volume.setValue(i,j,k, 1.0);
                         }
                     }

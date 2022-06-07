@@ -12,14 +12,15 @@ import org.rcsb.biozernike.volume.Volume;
 
 public class TestPQR {
     public static void main(String[] args) {
-        StructurePQR structure = new StructurePQR(args[0]);
+        double gridWidth = 0.1;
+        StructurePQR structure = new StructurePQR(args[0], gridWidth);
         try{ 
             int[] dims = structure.calcBoundingBox(5);
             System.out.println("Dims: " + dims[0]+ " " + dims[1]+ " " + dims[2] + "\n");
 
             double[] voxels = new double[dims[0]*dims[1]*dims[2]];
             Volume volume = new Volume();
-            volume.createFromData(dims, voxels,1.0);
+            volume.createFromData(dims, voxels,gridWidth);
             volume.resetVoxels();
             structure.fillVoxels(volume, dims,5);
             volume.updateCenter();
