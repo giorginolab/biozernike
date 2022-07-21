@@ -45,6 +45,8 @@ public class StructurePQR {
                     z.add(Double.parseDouble(parts[7]));
                     radius.add(Double.parseDouble(parts[9]));
                 }
+               
+               
             }
         }catch(FileNotFoundException e){
             System.out.println("File not found");
@@ -132,11 +134,13 @@ public class StructurePQR {
         }
     }
 
-    public void writeDescriptors(double[] descriptors, String nameFile, int order){
+    public void writeDescriptors(double[] descriptors, String nameFile, int order, String nameFile1){
         FileWriter fileWriter;
+        FileWriter fileWriter1;
         int j = 0;
 
         try {
+        	//write file with index, descriptor, n, l, z and one row file
             fileWriter = new FileWriter(nameFile);
             fileWriter.write("Index Descriptor n l z\n");
             for(int n = 0; n<=order; n++){
@@ -152,6 +156,31 @@ public class StructurePQR {
                 }
             }
             fileWriter.close();
+
+            
+            //write one row file
+            j = 0;
+            fileWriter1 = new FileWriter(nameFile1);
+            fileWriter1.write("Name ");
+            for(int n = 0; n<order; n++){
+            	for(int k = 0; k<=(n/2); k++){
+            	 int l = k*2+(int)((n%2!=0) ? 1 : 0);
+            	 fileWriter1.write("z"+n+","+l + " ");
+            	}
+            }
+            fileWriter1.write("\n");
+            fileWriter1.write(nameFile);
+             for(int n = 0; n<=order; n++){
+                for(int k = 0; k<=(n/2); k++){
+                    int l = k*2+(int)((n%2!=0) ? 1 : 0);
+                    fileWriter1.write(" " 
+                    + descriptors[j]);
+                    j++;
+                }
+            }
+            fileWriter1.write("\n");
+            fileWriter1.close();
+            
         } catch (IOException e) {
              e.printStackTrace();
         }

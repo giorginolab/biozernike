@@ -56,7 +56,6 @@ public class Descriptor {
 	 */
 	public Descriptor(Volume volume, DescriptorConfig config) {
 		this.config = config;
-
 		init(volume, null);
 	}
 
@@ -67,7 +66,6 @@ public class Descriptor {
 	 */
 	private void init(Volume volume, Point3d[] reprPoints) {
 		InvariantNorm normalization = new InvariantNorm(volume, config.maxOrderZernike);
-
 		if (config.mode.contains(DescriptorMode.CALCULATE_RAW)) {
 			calcGeometryDescriptor(volume, reprPoints, config.withCovEigenValsInGeom);
 			calcMomentInvariantsRaw(normalization);
