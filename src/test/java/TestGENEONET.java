@@ -32,7 +32,7 @@ public class TestGENEONET {
 
             VolumeIO.write(volume, new File("fromPDBtoMRC.mrc"), MapFileType.MRC); 
             double[] descriptors = c.calcDescriptor(volume, Integer.parseInt(args[1]));
-            c.writeDescriptors(descriptors, args[2], Integer.parseInt(args[1]));
+            c.writeDescriptors(descriptors, args[2], Integer.parseInt(args[1]), args[3]);
         } catch (Exception e){
             e.printStackTrace();  
         }

@@ -97,8 +97,9 @@ public class ParseGeneonetPDB {
     }
 
 
-    public void writeDescriptors(double[] descriptors, String nameFile, int order){
+    public void writeDescriptors(double[] descriptors, String nameFile, int order, String nameFile1){
         FileWriter fileWriter;
+        FileWriter fileWriter1;
         int j = 0;
 
         try {
@@ -117,6 +118,28 @@ public class ParseGeneonetPDB {
                 }
             }
             fileWriter.close();
+
+            j = 0;
+            fileWriter1 = new FileWriter(nameFile1);
+            fileWriter1.write("Name ");
+            for(int n = 0; n<=order; n++){
+            	for(int k = 0; k<=(n/2); k++){
+                	int l = k*2+(int)((n%2!=0) ? 1 : 0);
+                	fileWriter1.write("z"+n+","+l+" ");
+                }
+            }
+            fileWriter1.write("\n");
+            fileWriter1.write(nameFile);
+             for(int n = 0; n<=order; n++){
+            	for(int k = 0; k<=(n/2); k++){
+                	int l = k*2+(int)((n%2!=0) ? 1 : 0);
+                	fileWriter1.write(" " + descriptors[j]);
+                	j++;
+                }
+            }
+            fileWriter1.write("\n");
+            fileWriter1.close();
+            
         } catch (IOException e) {
              e.printStackTrace();
         }
