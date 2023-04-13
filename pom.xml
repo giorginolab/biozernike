@@ -96,7 +96,6 @@
       <groupId>org.biojava</groupId>
       <artifactId>biojava-structure</artifactId>
       <version>7.0.0</version>
-      <scope>test</scope>
     </dependency>
 
   </dependencies>
